@@ -32,101 +32,84 @@ public class ReadExcel {
     public static final int COLUMN_INDEX_QUIZ_Q_ID = 8;
 
     public static void main(String[] args) throws IOException {
-//        final String excelFilePath = "D:/Book1.xlsx";
-//        final List<Question> books = readExcel(excelFilePath);
-//        for (Question book : books) {
-//            System.out.println(book.getAnswer());
-//        }
-
-        String jdbcUrl = "jdbc:sqlserver://localhost;databaseName=examAssignment";
-        String userName = "sa";
-        String password = "123";
-        String excelFilePath = "D:\\Book2.csv";
-        int batchSize = 20;
-        Connection connection = null;
-        try {
-            connection = DriverManager.getConnection(jdbcUrl, userName, password);
-            connection.setAutoCommit(false);
-            String sql = "insert into question\n" +
-                    "(ques_id, answer, content, image, option1, option2, option3, option4, quiz_q_id)\n" +
-                    "values (?, ?, ?,?, ?, ?, ?, ?, ?)";
-            PreparedStatement statement = connection.prepareStatement(sql);
-            BufferedReader lineReader = new BufferedReader(new FileReader(excelFilePath));
-            String lineText = null;
-            int count = 0;
-            lineReader.readLine();
-            while ((lineText = lineReader.readLine()) != null) {
-                String[] data = lineText.split(",");
-                String id = data[0];
-                String answer = data[1];
-                String content = data[2];
-                String image = data[3];
-                String option1 = data[4];
-                String option2 = data[5];
-                String option3 = data[6];
-                String option4 = data[7];
-                String quiz_q_id = data[8];
-                statement.setLong(1, Long.parseLong(id));
-                statement.setString(2, answer);
-                statement.setString(3, content);
-                statement.setString(4, image);
-                statement.setString(5, option1);
-                statement.setString(6, option2);
-                statement.setString(7, option3);
-                statement.setString(8, option4);
-                statement.setLong(9, Long.parseLong(quiz_q_id));
-                statement.addBatch();
-                if (count % batchSize == 0) {
-                    statement.executeBatch();
-                }
-                lineReader.close();
-                statement.executeBatch();
-                connection.commit();
-                connection.close();
-                lineReader.close();
-                System.out.println("OK");
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
+        final String excelFilePath = "D:/Book1.xlsx";
+        final List<Question> books = readExcel(excelFilePath);
+        for (Question book : books) {
+            System.out.println(book.getAnswer());
         }
+
+//        String jdbcUrl = "jdbc:sqlserver://localhost;databaseName=examAssignment";
+//        String userName = "sa";
+//        String password = "123";
+//        String excelFilePath = "D:\\Book2.csv";
+//        int batchSize = 20;
+//        Connection connection = null;
+//        try {
+//            connection = DriverManager.getConnection(jdbcUrl, userName, password);
+//            connection.setAutoCommit(false);
+//            String sql = "insert into question\n" +
+//                    "(ques_id, answer, content, image, option1, option2, option3, option4, quiz_q_id)\n" +
+//                    "values (?, ?, ?,?, ?, ?, ?, ?, ?)";
+//            PreparedStatement statement = connection.prepareStatement(sql);
+//            BufferedReader lineReader = new BufferedReader(new FileReader(excelFilePath));
+//            String lineText = null;
+//            int count = 0;
+//            lineReader.readLine();
+//            while ((lineText = lineReader.readLine()) != null) {
+//                String[] data = lineText.split(",");
+//                String id = data[0];
+//                String answer = data[1];
+//                String content = data[2];
+//                String image = data[3];
+//                String option1 = data[4];
+//                String option2 = data[5];
+//                String option3 = data[6];
+//                String option4 = data[7];
+//                String quiz_q_id = data[8];
+//                statement.setLong(1, Long.parseLong(id));
+//                statement.setString(2, answer);
+//                statement.setString(3, content);
+//                statement.setString(4, image);
+//                statement.setString(5, option1);
+//                statement.setString(6, option2);
+//                statement.setString(7, option3);
+//                statement.setString(8, option4);
+//                statement.setLong(9, Long.parseLong(quiz_q_id));
+//                statement.addBatch();
+//                if (count % batchSize == 0) {
+//                    statement.executeBatch();
+//                }
+//                lineReader.close();
+//                statement.executeBatch();
+//                connection.commit();
+//                connection.close();
+//                lineReader.close();
+//                System.out.println("OK");
+//            }
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
 
     }
 
     public static List<Question> readExcel(String excelFilePath) throws IOException {
         List<Question> listBooks = new ArrayList<>();
-
-        // Get file
         InputStream inputStream = new FileInputStream(new File(excelFilePath));
-
-        // Get workbook
         Workbook workbook = getWorkbook(inputStream, excelFilePath);
-
-        // Get sheet
         Sheet sheet = workbook.getSheetAt(0);
-
-        // Get all rows
         Iterator<Row> iterator = sheet.iterator();
         while (iterator.hasNext()) {
             Row nextRow = iterator.next();
-            //note
-//            if (nextRow.getRowNum() == 0) {
-//                // Ignore header
-//                continue;
-//            }
 
-            // Get all cells
             Iterator<Cell> cellIterator = nextRow.cellIterator();
 
-            // Read cells and set value for book object
             Question book = new Question();
             while (cellIterator.hasNext()) {
-                //Read cell
                 Cell cell = cellIterator.next();
                 Object cellValue = getCellValue(cell);
                 if (cellValue == null || cellValue.toString().isEmpty()) {
                     continue;
                 }
-                // Set value for book object
                 int columnIndex = cell.getColumnIndex();
                 switch (columnIndex) {
                     case COLUMN_INDEX_ID:
@@ -156,9 +139,10 @@ public class ReadExcel {
                     case COLUMN_INDEX_OPTION4:
                         book.setOption4((String) getCellValue(cell));
                         break;
-//
                     case COLUMN_INDEX_QUIZ_Q_ID:
-                        book.setQuiz((Quiz) getCellValue(cell));
+                        Quiz q = new Quiz();
+                        q.setQId((long) BigDecimal.valueOf((double) cellValue).intValue());
+                        book.setQuiz(q);
                         break;
                     default:
                         break;

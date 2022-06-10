@@ -1,9 +1,11 @@
 package com.exam.service;
 
+import com.exam.helper.UserFoundException;
 import com.exam.model.exam.Category;
 import com.exam.model.exam.Question;
 import com.exam.model.exam.Quiz;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 
@@ -11,7 +13,10 @@ public interface QuestionService {
 
     public Question addQuestion(Question question);
 
-    public void insertExcel();
+    //    public void insertExcel();
+    public void doSomethingAfterStartup(Long id, Long total) throws IOException, UserFoundException;
+
+    public Long countByIdQuiz(Long id);
 
     public Question updateQuestion(Question question);
 

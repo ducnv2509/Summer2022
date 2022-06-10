@@ -1,5 +1,6 @@
 package com.exam.controller;
 
+import com.exam.helper.UserFoundException;
 import com.exam.model.exam.Question;
 import com.exam.model.exam.Quiz;
 import com.exam.service.QuestionService;
@@ -8,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -25,9 +27,9 @@ public class QuestionController {
         return ResponseEntity.ok(this.questionService.addQuestion(question));
     }
 
-    @PostMapping("/excel")
-    public void addExcel() {
-        this.questionService.insertExcel();
+    @PostMapping("/excel/{id}/{total}")
+    public void addExcel(@PathVariable("id") Long id, @PathVariable("total") Long total) throws IOException, UserFoundException {
+        this.questionService.doSomethingAfterStartup(id, total);
     }
 
     @PutMapping("/")
